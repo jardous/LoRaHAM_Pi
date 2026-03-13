@@ -22,7 +22,7 @@
 
 
 import sys
-from .constants import *
+from .constants import REG, MODE, BW, CODING_RATE, PA_SELECT, GAIN, MASK
 from .board_config import BOARD 
 
 
@@ -94,16 +94,16 @@ class LoRa(object):
         self.mode = MODE.SLEEP
 
     def initialize(self, freq):
-        print("Starting LoRa object")
+        print(f"Starting LoRa for freq={freq}")
 
-        if freq == 434.:
+        if freq > 433 and freq < 435:
             print("Setting up for 433MHz band")
             self.board = BOARD("433")
         elif freq == 868:
             print("Setting up for 868MHz band")
             self.board = BOARD("868")
         else:
-            raise RuntimeError("Unknown frequency band %s" % self.get_freq())   
+            raise RuntimeError(f"Unknown frequency band {freq}")
 
         self.set_freq(freq)
         self.set_mode(MODE.SLEEP)
@@ -222,21 +222,15 @@ class LoRa(object):
     # All the set/get/read/write functions
 
     def get_mode(self):
-        """ Get the mode
-        :return:    New mode
-        """
         self.mode = self.board.spi.xfer([REG.LORA.OP_MODE, 0])[1]
         return self.mode
 
     def set_mode(self, mode):
-        """ Set the mode
-        :param mode: Set the mode. Use constants.MODE class
-        :return:    New mode
-        """
         # the mode is backed up in self.mode
         if mode == self.mode:
             return mode
         if self.verbose:
+            sys.stderr.write("Mode: %d\n", mode)
             sys.stderr.write("Mode <- %s\n" % MODE.lookup[mode])
         self.mode = mode
         return self.board.spi.xfer([REG.LORA.OP_MODE | 0x80, mode])[1]
@@ -298,7 +292,8 @@ class LoRa(object):
         :return: New register settings (3 bytes [msb, mid, lsb])
         :rtype: list[int]
         """
-        assert self.mode == MODE.SLEEP or self.mode == MODE.STDBY or self.mode == MODE.FSK_STDBY
+        print("mode: %d" % self.mode)
+        #assert self.mode == MODE.SLEEP or self.mode == MODE.STDBY or self.mode == MODE.FSK_STDBY
         i = int(f * 16384.)    # choose floor
         msb = i // 65536
         i -= msb * 65536

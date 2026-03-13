@@ -2,7 +2,7 @@ import curses
 import time
 import threading
 from SX127x.LoRa import *
-from SX127x.board_config import BOARD
+from SX127x.board_config import BOARD as B
 from termcolor import colored
 import re
 
@@ -20,7 +20,7 @@ import re
 # Eigenes Rufzeichen! Ändere dies! 
 # Du kannst zur Laufzeit mit STRG-K die Konfiguration öffnen
 # Du kannst auch eine SSID wie z.b. -10 anfügen
-CALL_SIGN = "DL0xxx-10"
+CALL_SIGN = "J5150"
 CALL_SIGN_STOP = ">"
 
 APRS_PATH = "APRS,WIDE1-1"
@@ -31,8 +31,8 @@ SEPERATOR = "::"
 #mein_text = "DC2WA>APRS,WIDE2-2::ALL      :"
 
 # LoRa initialisieren
-BOARD.setup()
-BOARD.reset()
+B.setup()
+B.reset()
 
 SEND_FREQ = 433.775  # Sendefrequenz in MHz
 #RECV_FREQ = 433.775  # Empfangsfrequenz in MHz
@@ -87,7 +87,7 @@ def extract_callsign(message):
     return match.group(1) if match else None
 
 class LoRaSender(LoRa):
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=True):
         super(LoRaSender, self).__init__(verbose)
         self.set_mode(MODE.SLEEP)
         self.set_dio_mapping([0] * 6)

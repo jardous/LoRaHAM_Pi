@@ -21,13 +21,16 @@
 # You should have received a copy of the GNU General Public License along with pySX127.  If not, see
 # <http://www.gnu.org/licenses/>.
 
+import binascii
 import sys
+from datetime import datetime
 from time import sleep
 from SX127x.LoRa import MODE, LoRa
 from SX127x.LoRaArgumentParser import LoRaArgumentParser
 
-parser = LoRaArgumentParser("Continous LoRa receiver.")
+parser = LoRaArgumentParser("Continuous LoRa receiver.")
 
+OUTPUT_FILE = "messages.txt"
 
 class LoRaRcvCont(LoRa):
 
@@ -39,7 +42,15 @@ class LoRaRcvCont(LoRa):
         print("\nRxDone")
         self.clear_irq_flags(RxDone=1)
         payload = self.read_payload(nocheck=True)
-        print(bytes(payload).decode("utf-8",'ignore'))
+        with open(OUTPUT_FILE, "at") as f:
+            formatted_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            f.write(formatted_datetime)
+            f.write(": ")
+            f.write(str(binascii.hexlify(bytes(payload)), "ascii"))
+            f.write("\n")
+            f.write(bytes(payload).decode("utf-8", 'ignore'))
+            f.write("\n")
+        print(bytes(payload).decode("utf-8", 'ignore'))
         self.set_mode(MODE.SLEEP)
         self.reset_ptr_rx()
         self.board.led_off()
@@ -84,6 +95,13 @@ args = parser.parse_args()
 lora = LoRaRcvCont(verbose=False)
 lora.initialize(args.freq)
 lora.set_dio_mapping([0] * 6)
+
+with open(OUTPUT_FILE, "at") as f:
+    f.write("\n")
+    f.write(80*"#")
+    f.write(f"\n# Config: freq={args.freq}, sf={args.sf}, bw={args.bw}, cr={args.coding_rate}\n")
+    f.write(80*"#")
+    f.write("\n")
 
 #lora.set_freq(args.freq)
 lora.set_preamble(args.preamble)

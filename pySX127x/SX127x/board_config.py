@@ -71,6 +71,7 @@ class BOARD:
             raise ValueError("Frequency must be '433' or '868'")
 
         # Configure the Raspberry GPIOs
+        #GPIO.setwarnings(False) # Ignore warning for now
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.LED, GPIO.OUT)
         GPIO.setup(self.RST, GPIO.OUT)

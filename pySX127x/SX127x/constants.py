@@ -27,6 +27,7 @@ def add_lookup(cls):
     varnames = filter(str.isupper, cls.__dict__.keys())
     lookup = dict(map(lambda varname: (cls.__dict__.get(varname, None), varname), varnames))
     setattr(cls, 'lookup', lookup)
+    cls.__str__ = lambda v: lookup[v]
     return cls
 
 
@@ -42,6 +43,10 @@ class MODE:
     CAD      = 0x87
     FSK_STDBY= 0x01     # needed for calibration
 
+    def __str__(self):
+        return "xxxx"
+    def __repr__(self):
+        return "yyyy"
 
 @add_lookup
 class BW:
